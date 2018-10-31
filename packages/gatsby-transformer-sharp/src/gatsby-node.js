@@ -1,7 +1,10 @@
 const fs = require(`fs-extra`)
 
+const qualityCacheKey = 'transformer-sharp-default-quality'
+
 exports.onCreateNode = require(`./on-node-create`)
 exports.setFieldsOnGraphQLNodeType = require(`./extend-node-type`)
+
 
 exports.onPreExtractQueries = async ({ store, getNodesByType }) => {
   const program = store.getState().program
@@ -17,4 +20,13 @@ exports.onPreExtractQueries = async ({ store, getNodesByType }) => {
     require.resolve(`gatsby-transformer-sharp/src/fragments.js`),
     `${program.directory}/.cache/fragments/image-sharp-fragments.js`
   )
+}
+
+exports.onPreBootstrap = async ({cache}, pluginOptions) => {
+  const { defaultQuality } = pluginOptions
+  const cachedQuality = await cache.get(qualityCacheKey)
+
+  if(defaultQuality && !cachedQuality) {
+    cache.set(qualityCacheKey, cachedQuality)
+  }
 }

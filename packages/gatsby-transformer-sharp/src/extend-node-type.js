@@ -21,6 +21,8 @@ const fsExtra = require(`fs-extra`)
 const imageSize = require(`probe-image-size`)
 const path = require(`path`)
 
+const qualityCacheKey = 'transformer-sharp-default-quality'
+
 const {
   ImageFormatType,
   ImageCropFocusType,
@@ -45,13 +47,14 @@ const getTracedSVG = async ({ file, image, fieldArgs }) =>
     fileArgs: fieldArgs,
   })
 
-const fixedNodeType = ({
+const fixedNodeType = async ({
   type,
   pathPrefix,
   getNodeAndSavePathDependency,
   reporter,
   name,
 }) => {
+  const defaultQuality = await cache.get(qualityCacheKey)
   return {
     type: new GraphQLObjectType({
       name: name,
@@ -128,7 +131,7 @@ const fixedNodeType = ({
       },
       quality: {
         type: GraphQLInt,
-        defaultValue: 50,
+        defaultValue: defaultQuality ? defaultQuality : 50,
       },
       toFormat: {
         type: ImageFormatType,
